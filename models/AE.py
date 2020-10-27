@@ -32,13 +32,13 @@ class Autoencoder(nn.Module):
         # Dynamically determine the sizes
         x = nn.Sequential(*enc_conv_layers)(input_x_to_determine_size)
         pre_flatten_shape = x.shape
-        x = nn.Flatten(bs=True)(x)
+        x = nn.Flatten()(x)
 
-        enc_conv_layers.append(nn.Flatten(bs=True))
+        enc_conv_layers.append(nn.Flatten())
         enc_conv_layers.append(nn.Linear(x.shape[1], z_dim))
         self.enc_conv_layers = nn.Sequential(*enc_conv_layers)
         dec_conv_layers.insert(0, nn.Linear(z_dim, np.prod(pre_flatten_shape[1:])))
-        dec_conv_layers.insert(1, nn.View(pre_flatten_shape, bs=True))
+        dec_conv_layers.insert(1, nn.View(pre_flatten_shape))
         self.dec_conv_layers = nn.Sequential(*dec_conv_layers)
 
     def forward(self, x):
