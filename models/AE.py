@@ -1,8 +1,20 @@
+import torch
 import numpy as np
 import torch.nn as nn
 
+class View(nn.Module):
+    def __init__(self, shape, bs=False):
+        super(View, self).__init__()
+        self.bs = bs
+        self.shape = shape
+
+    def forward(self, x):
+        return x.view(x.shape[0], *self.shape[1:]) if self.bs else x.view(*self.shape)
+
+
 class Autoencoder(nn.Module):
     def __init__(self, input_x_to_determine_size, input_channels, enc_output_channels, enc_kernel_size, enc_strides, enc_padding, dec_output_channels, dec_kernel_size, dec_strides, dec_padding, dec_op_padding, z_dim):
+        super(Autoencoder, self).__init__()
 
         # Encoder Network
         enc_conv_layers = []
@@ -38,7 +50,7 @@ class Autoencoder(nn.Module):
         enc_conv_layers.append(nn.Linear(x.shape[1], z_dim))
         self.enc_conv_layers = nn.Sequential(*enc_conv_layers)
         dec_conv_layers.insert(0, nn.Linear(z_dim, np.prod(pre_flatten_shape[1:])))
-        dec_conv_layers.insert(1, nn.View(pre_flatten_shape))
+        dec_conv_layers.insert(1, View(pre_flatten_shape, bs=True))
         self.dec_conv_layers = nn.Sequential(*dec_conv_layers)
 
     def forward(self, x):
